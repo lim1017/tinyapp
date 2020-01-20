@@ -25,8 +25,9 @@
       </thead>
       <tbody>
         <% for(let url in urls) { %>
+          
           <tr>
-            <td><%= url %></td>
+            <td><a href=<%= urls[url] %>><%= url %></a></td>
             <td><%= urls[url] %></td>
           </tr>
         <% } %>
