@@ -1,9 +1,13 @@
 
 const express = require("express");
 const app = express();
+const cookieParser= require('cookie-parser')
+
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+
 
 app.set("view engine", "ejs");
 
@@ -77,6 +81,15 @@ app.post("/urls/:id", (req, res) => {
 
 });
 
+//login
+app.post("/login", (req, res) => {
+
+console.log(req.body.USER)
+
+res.cookie('username',req.body.USER)
+
+res.redirect(`/urls`)
+})
 
 
 
