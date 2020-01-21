@@ -28,10 +28,25 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };  //urls is equal to urlDatabase object in the .ejs file.
+
+
+  let templateVars = { urls: urlDatabase, username:undefined };  //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
+
+  // console.log(req.cookies, 'cookies ')
+
+  if (req.cookies['username']){
+    templateVars.username=req.cookies['username']
+  }
+
+  // console.log(templateVars)
+
   res.render("urls_index", templateVars);
+
 });
+
+
+
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
