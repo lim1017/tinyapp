@@ -24,8 +24,8 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };  //urls is equal to urlDatabase object
-  console.log(templateVars)
+  let templateVars = { urls: urlDatabase };  //urls is equal to urlDatabase object in the .ejs file.
+  // console.log(templateVars, ' template vars')
   res.render("urls_index", templateVars);
 });
 
@@ -33,25 +33,52 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//page after a url is created && edit page
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-
+  
+  // console.log(req.params, ' req.params')
+  // console.log(templateVars)
   if (urlDatabase[req.params.shortURL] === undefined){
     res.send('this URL does not exist')
   }
-
   res.render("urls_show", templateVars);
 });
 
 
+//add a new link
 app.post("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
-  // console.log(req.body.longURL);  // Log the POST request body to the console
-  let random=generateRandomString()
-  urlDatabase[random]=req.body.longURL
+  console.log(req.params, 'req.params')
+  // console.log(req.body, 'req.body.longURL');  // Log the POST request body to the console
+  let randomID=generateRandomString()
+  urlDatabase[randomID]=req.body.longURL
   // console.log(templateVarscl)
-  res.redirect(`/urls/${random}`) //redirect to route not to page.
+  res.redirect(`/urls/${randomID}`) //redirect to route not to page.
 });
+
+
+//delete a link
+app.post("/urls/:shortURL/delete", (req, res) => {
+  // console.log(req.params, 'req.params')
+
+  delete urlDatabase[req.params.shortURL]
+  res.redirect(`/urls`)
+});
+
+
+//update a link
+app.post("/urls/:id", (req, res) => {
+  console.log(req.params.id, 'req.params')
+  console.log(req.body.longURL, 'req.body.long')
+
+  urlDatabase[req.params.id]=req.body.longURL
+  res.redirect(`/urls`)
+
+});
+
+
+
 
 
 
