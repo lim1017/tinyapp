@@ -22,15 +22,15 @@
     <div class="card-footer text-muted"></div>
   </div>
 
-
-  <form class="form-inline" action="/urls/<%- shortURL -%>" method="POST">
-    <div class="form-group mb-2">
+  <br>
+  <div class="form-group mb-2" style='display:flex; justify-content: center'>
+  <form class="form-inline" action="/urls/<%- shortURL -%>" method="POST" >
       <label for="longURL">Update your URL:</label>
       <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 300px; margin: 1em">
       <button type="submit" class="btn btn-primary">Update</button>
-    </div>
+   
   </form>
-
+  </div>
 
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
