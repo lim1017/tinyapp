@@ -28,33 +28,25 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-
-
   let templateVars = { urls: urlDatabase, username:undefined };  //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
-
   // console.log(req.cookies, 'cookies ')
-
   if (req.cookies['username']){
     templateVars.username=req.cookies['username']
   }
-
   // console.log(templateVars)
-
   res.render("urls_index", templateVars);
-
 });
 
-
-
-
+//create new link
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {username:req.cookies['username'] }
+  res.render("urls_new", templateVars);
 });
 
 //page after a url is created && edit page
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username:req.cookies['username'] };
   
   // console.log(req.params, ' req.params')
   // console.log(templateVars)
@@ -106,8 +98,14 @@ res.cookie('username',req.body.USER)
 res.redirect(`/urls`)
 })
 
+//logout
+app.post("/logout", (req, res) => {
 
-
+  
+   res.clearCookie('username')
+  
+  res.redirect(`/urls`)
+})
 
 
 
