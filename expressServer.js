@@ -19,12 +19,12 @@ const users = {
   userRandomID1: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "asdf"
   },
   userRandomID2: {
     id: "userRandomID2",
     email: "user2@example.com",
-    password: "purple-monkey-dinosaur222"
+    password: "asdf"
   }
 };
 
@@ -115,6 +115,7 @@ app.post("/register", (req, res) => {
     res.statusCode = 400;
     res.end("400 Bad Request");
   } else if (checkForEmail(email, users)) {
+    //email already exists
     console.log(checkForEmail(email, users));
 
     res.statusCode = 401;
@@ -144,24 +145,27 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls`);
 });
 
+
 //login
 app.post("/login", (req, res) => {
-let email =req.body.email
+  const { email, password} = req.body;
 
-if (checkForEmail(email, users)){
-  if(lookUpIDwithEmail(email, users)){
-    res.cookie('ID',lookUpIDwithEmail(email, users))
-    res.cookie('email',email)
-
+  if (checkForEmail(email, users)) {
+    // if (lookUp3rdArgwith1st(email, users, "id")===id) {
+      if (lookUp3rdArgwith1st(email, users, "password")===password) {
+        res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
+        res.cookie("email", email);
+      } else res.redirect(`/login`)
+    // }
+  } else {
+    //email not exists
+    res.statusCode = 403;
+    res.end("403 E-mail not found");
   }
-}
 
-// res.cookie('email',req.body.email)
-res.redirect(`/urls`)
-
-})
-
-
+  // res.cookie('email',req.body.email)
+  res.redirect(`/urls`);
+});
 
 
 
@@ -169,9 +173,6 @@ res.redirect(`/urls`)
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-
 
 function generateRandomString(num) {
   let randomString = "";
@@ -194,14 +195,14 @@ function checkForEmail(emails, obj) {
   return false;
 }
 
-function lookUpIDwithEmail(email, obj){
-  console.log(obj,   'obj')
-  
-  for(id in obj){
-    if(obj[id].email===email){
-      return obj[id].id
+function lookUp3rdArgwith1st(arg1, obj, arg3) {
+  for (id in obj) {
+    // console.log(obj[id].email, 'obj[id].email')
+    if (obj[id].email === arg1) {
+      // console.log(obj[id].arg3, 'obj[id].arg3')
+      return obj[id][arg3];
     }
   }
 
-  return ''
+  return "";
 }
