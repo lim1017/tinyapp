@@ -22,24 +22,18 @@
     </div>
 
     <% if (username===undefined){ %>
-    <form class="form-inline" action="/login" method="POST">
-      <div class="form-group mb-2">
-        <label for="USER">Enter Any Username:</label>
-        <input
-          class="form-control"
-          type="text"
-          name="USER"
-          placeholder="Username"
-          style="width: 150px; height: 25px; margin: 1em"
-        />
-        <button type="submit" class="btn btn-primary">login</button>
-      </div>
-    </form>
+      <form method="get" action="/login">
+        <button type="submit" class="btn btn-primary" style="margin-right:1em">Login</button>
+      </form>
+
+      <form method="get" action="/register/">
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+
     <% } else{ %>
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
         <label for="USER">Logged in as: <%= username %> </label>
-
         <button type="submit" class="btn btn-primary" style="margin:1em">
           Logout
         </button>

@@ -19,12 +19,6 @@ const urlDatabase = {
 };
 
 
-app.get("/u/:shortURL", (req, res) => {
-  // const longURL = ...
-  // console.log(req.params.shortURL, '          rrres')
-  let short=req.params.shortURL
-  res.redirect(urlDatabase[short]);
-});
 
 
 app.get("/urls", (req, res) => {
@@ -37,6 +31,12 @@ app.get("/urls", (req, res) => {
   // console.log(templateVars)
   res.render("urls_index", templateVars);
 });
+
+app.get("/u/:shortURL", (req, res) => {
+  let short=req.params.shortURL
+  res.redirect(urlDatabase[short]);
+});
+
 
 //create new link
 app.get("/urls/new", (req, res) => {
@@ -85,26 +85,46 @@ app.post("/urls/:id", (req, res) => {
 
   urlDatabase[req.params.id]=req.body.longURL
   res.redirect(`/urls`)
-
 });
 
-//login
-app.post("/login", (req, res) => {
 
-console.log(req.body.USER)
+//to login page
+app.get("/login", (req, res) => {
+  let templateVars = {username:req.cookies['username'] }
+  res.render(`urls_login`, templateVars);
+})
 
-res.cookie('username',req.body.USER)
+//to register page
+app.get("/register", (req, res) => {
+  let templateVars = {username:req.cookies['username'] }
+  res.render(`urls_register`, templateVars);
+})
 
+//register new account
+app.post("/register/new", (req, res) => {
+console.log(req.body.email)
+console.log(req.body.password)
+// res.cookie('username',req.body.USER)
 res.redirect(`/urls`)
 })
 
-//logout
-app.post("/logout", (req, res) => {
 
-  
-   res.clearCookie('username')
-  
-  res.redirect(`/urls`)
+// //login
+// app.post("/login", (req, res) => {
+// // console.log(req.body.USER)
+// res.cookie('username',req.body.USER)
+// res.redirect(`/urls`)
+// })
+
+// //logout
+// app.post("/logout", (req, res) => {
+//    res.clearCookie('username')  
+//    res.redirect(`/urls`)
+// })
+
+//register 
+app.post("/signup", (req, res) => {
+
 })
 
 
