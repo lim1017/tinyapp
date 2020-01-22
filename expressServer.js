@@ -18,6 +18,13 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users={
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  }
+}
 
 
 
@@ -62,7 +69,7 @@ app.post("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   console.log(req.params, 'req.params')
   // console.log(req.body, 'req.body.longURL');  // Log the POST request body to the console
-  let randomID=generateRandomString()
+  let randomID=generateRandomString(6)
   urlDatabase[randomID]=req.body.longURL
   // console.log(templateVarscl)
   res.redirect(`/urls/${randomID}`) //redirect to route not to page.
@@ -102,11 +109,26 @@ app.get("/register", (req, res) => {
 
 //register new account
 app.post("/register/new", (req, res) => {
-console.log(req.body.email)
-console.log(req.body.password)
-// res.cookie('username',req.body.USER)
+  let randomUserID=generateRandomString(8)
+
+// console.log(req.body.email)
+// console.log(req.body.password)
+// console.log(randomUserID)
+
+users[randomUserID]={
+  id:randomUserID,
+  email:req.body.email,
+  password:req.body.password
+}
+
+console.log(users[randomUserID])
+res.cookie('userObj',users[randomUserID])
+
 res.redirect(`/urls`)
 })
+
+
+
 
 
 // //login
@@ -122,12 +144,6 @@ res.redirect(`/urls`)
 //    res.redirect(`/urls`)
 // })
 
-//register 
-app.post("/signup", (req, res) => {
-
-})
-
-
 
 
 app.listen(PORT, () => {
@@ -135,10 +151,10 @@ app.listen(PORT, () => {
 });
 
 
-function generateRandomString() {
+function generateRandomString(num) {
   let randomString=''
   
-    for(let i = 0; i<6; i++){
+    for(let i = 0; i<num; i++){
       let random_asciiLetter=Math.floor((Math.random() * 25) + 97);
       randomString+=String.fromCharCode(random_asciiLetter)
     }
