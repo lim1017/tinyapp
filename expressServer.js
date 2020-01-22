@@ -29,11 +29,11 @@ const users = {
 };
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, id: undefined }; //urls is equal to urlDatabase object in the .ejs file.
+  let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
-  // console.log(req.cookies.userObj, 'cookies ')
-  if (req.cookies.userObj) {
-    templateVars.id = req.cookies.userObj;
+  // console.log(req.cookies.ID, 'cookies ')
+  if (req.cookies.ID) {
+    templateVars.id = req.cookies.ID;
     templateVars.email = req.cookies.email;
   }
   // console.log(templateVars)
@@ -129,7 +129,7 @@ app.post("/register", (req, res) => {
     };
 
     // console.log(users[randomUserID])
-    res.cookie("userObj", users[randomUserID].id);
+    res.cookie("ID", users[randomUserID].id);
     res.cookie("email", users[randomUserID].email);
 
     res.redirect(`/urls`);
@@ -138,22 +138,39 @@ app.post("/register", (req, res) => {
 
 //logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("userObj");
+  res.clearCookie("ID");
   res.clearCookie("email");
 
   res.redirect(`/urls`);
 });
 
-// //login
-// app.post("/login", (req, res) => {
-// // console.log(req.body.USER)
-// res.cookie('id',req.body.USER)
-// res.redirect(`/urls`)
-// })
+//login
+app.post("/login", (req, res) => {
+let email =req.body.email
+
+if (checkForEmail(email, users)){
+  if(lookUpIDwithEmail(email, users)){
+    res.cookie('ID',lookUpIDwithEmail(email, users))
+    res.cookie('email',email)
+
+  }
+}
+
+// res.cookie('email',req.body.email)
+res.redirect(`/urls`)
+
+})
+
+
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
 
 
 function generateRandomString(num) {
@@ -163,21 +180,28 @@ function generateRandomString(num) {
     let random_asciiLetter = Math.floor(Math.random() * 25 + 97);
     randomString += String.fromCharCode(random_asciiLetter);
   }
-
   return randomString;
 }
 
 function checkForEmail(emails, obj) {
   let users = Object.keys(obj);
-  console.log(emails);
-  console.log(users, " obj keys");
 
   for (user of users) {
-    console.log(user);
-
     if (obj[user].email === emails) {
       return true;
     }
   }
   return false;
+}
+
+function lookUpIDwithEmail(email, obj){
+  console.log(obj,   'obj')
+  
+  for(id in obj){
+    if(obj[id].email===email){
+      return obj[id].id
+    }
+  }
+
+  return ''
 }
