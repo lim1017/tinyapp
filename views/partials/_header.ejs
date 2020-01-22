@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <% if (username===undefined){ %>
+    <% if (id===undefined){ %>
       <form method="get" action="/login">
         <button type="submit" class="btn btn-primary" style="margin-right:1em">Login</button>
       </form>
@@ -33,7 +33,7 @@
     <% } else{ %>
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
-        <label for="USER">Logged in as: <%= username %> </label>
+        <label for="USER">Logged in as: <%= email %> </label>
         <button type="submit" class="btn btn-primary" style="margin:1em">
           Logout
         </button>

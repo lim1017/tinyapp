@@ -29,11 +29,12 @@ const users={
 
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username:undefined };  //urls is equal to urlDatabase object in the .ejs file.
+  let templateVars = { urls: urlDatabase, id:undefined };  //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
-  // console.log(req.cookies, 'cookies ')
-  if (req.cookies['username']){
-    templateVars.username=req.cookies['username']
+  // console.log(req.cookies.userObj, 'cookies ')
+  if (req.cookies.userObj){
+    templateVars.id=req.cookies.userObj
+    templateVars.email=req.cookies.email
   }
   // console.log(templateVars)
   res.render("urls_index", templateVars);
@@ -47,13 +48,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 //create new link
 app.get("/urls/new", (req, res) => {
-  let templateVars = {username:req.cookies['username'] }
+  let templateVars = {id:req.cookies['id'] }
   res.render("urls_new", templateVars);
 });
 
 //page after a url is created && edit page
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username:req.cookies['username'] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], id:req.cookies['id'] };
   
   // console.log(req.params, ' req.params')
   // console.log(templateVars)
@@ -97,36 +98,54 @@ app.post("/urls/:id", (req, res) => {
 
 //to login page
 app.get("/login", (req, res) => {
-  let templateVars = {username:req.cookies['username'] }
+  let templateVars = {id:req.cookies['id'] }
   res.render(`urls_login`, templateVars);
 })
 
 //to register page
 app.get("/register", (req, res) => {
-  let templateVars = {username:req.cookies['username'] }
+  let templateVars = {id:req.cookies['id'] }
   res.render(`urls_register`, templateVars);
 })
 
 //register new account
-app.post("/register/new", (req, res) => {
+app.post("/register", (req, res) => {
+  const {email, password} = req.body;
+  
+
+  if(email === '' || password===''){
+    res.statusCode = 400;
+    res.end("400 Bad Request");  
+  } 
+  else if(email ==='user@example.com'){
+    res.statusCode = 401;
+    res.end("401 Bad Request");
+  } else{
+  
   let randomUserID=generateRandomString(8)
+  
+  users[randomUserID]={
+    id:randomUserID,
+    email:email,
+    password:password
+  }
 
-// console.log(req.body.email)
-// console.log(req.body.password)
-// console.log(randomUserID)
-
-users[randomUserID]={
-  id:randomUserID,
-  email:req.body.email,
-  password:req.body.password
-}
-
-console.log(users[randomUserID])
-res.cookie('userObj',users[randomUserID])
+  console.log(users[randomUserID])
+  res.cookie('userObj',users[randomUserID].id)
+  res.cookie('email',users[randomUserID].email)
 
 res.redirect(`/urls`)
+}
 })
 
+
+//logout
+app.post("/logout", (req, res) => {
+   res.clearCookie('userObj')  
+   res.clearCookie('email')  
+
+   res.redirect(`/urls`)
+})
 
 
 
@@ -134,15 +153,10 @@ res.redirect(`/urls`)
 // //login
 // app.post("/login", (req, res) => {
 // // console.log(req.body.USER)
-// res.cookie('username',req.body.USER)
+// res.cookie('id',req.body.USER)
 // res.redirect(`/urls`)
 // })
 
-// //logout
-// app.post("/logout", (req, res) => {
-//    res.clearCookie('username')  
-//    res.redirect(`/urls`)
-// })
 
 
 
@@ -161,3 +175,8 @@ function generateRandomString(num) {
   
   return randomString
   }
+
+
+function checkForEmail(email, obj{
+
+})
