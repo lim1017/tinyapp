@@ -53,10 +53,14 @@ app.get("/urls/new", (req, res) => {
 
 //page after a url is created && edit page
 app.get("/urls/:shortURL", (req, res) => {
+
+  console.log(req.cookies)
+
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    id: req.cookies["id"]
+    id: req.cookies["ID"],
+    email: req.cookies['email']
   };
 
   // console.log(req.params, ' req.params')
