@@ -113,13 +113,13 @@ app.post("/register", (req, res) => {
 
   if (email === "" || password === "") {
     res.statusCode = 400;
-    res.end("400 Bad Request");
+    res.end("400 Bad Request, Email or Password empty");
   } else if (checkForEmail(email, users)) {
     //email already exists
     console.log(checkForEmail(email, users));
 
     res.statusCode = 401;
-    res.end("401 Bad Request");
+    res.end("401 Bad Request, Email already exists");
   } else {
     let randomUserID = generateRandomString(8);
 
@@ -155,7 +155,10 @@ app.post("/login", (req, res) => {
       if (lookUp3rdArgwith1st(email, users, "password")===password) {
         res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
         res.cookie("email", email);
-      } else res.redirect(`/login`)
+      } else {
+        res.statusCode = 403;
+        res.end("403 Incorrect password");
+      }
     // }
   } else {
     //email not exists
