@@ -12,7 +12,7 @@ const PORT = 8080; // default port 8080
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  '9sm5xK': "http://www.google.com"
 };
 
 const users = {
@@ -47,22 +47,23 @@ app.get("/u/:shortURL", (req, res) => {
 
 //create new link
 app.get("/urls/new", (req, res) => {
-  let templateVars = { id: req.cookies["id"] };
+
+  if ( req.cookies["ID"]=== undefined){
+    res.redirect(`/login`)
+  }
+
+  let templateVars = { id: req.cookies["ID"], email: req.cookies['email']};
   res.render("urls_new", templateVars);
 });
 
 //page after a url is created && edit page
 app.get("/urls/:shortURL", (req, res) => {
-
-  console.log(req.cookies)
-
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
     id: req.cookies["ID"],
     email: req.cookies['email']
   };
-
   // console.log(req.params, ' req.params')
   // console.log(templateVars)
   if (urlDatabase[req.params.shortURL] === undefined) {
