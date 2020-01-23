@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session')
 
 
 const bcrypt = require('bcrypt');
@@ -11,7 +11,14 @@ const saltRounds = 3;
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1','key2'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 app.set("view engine", "ejs");
 
@@ -44,14 +51,14 @@ const users = {
 };
 
 app.get("/urls", (req, res) => {
-  // console.log(req.cookies.ID, "cookie id");
+  // console.log(req.session.ID, "cookie id");
 console.log(users)
   let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
-  // console.log(req.cookies.ID, 'cookies ')
-  if (req.cookies.ID) {
-    templateVars.id = req.cookies.ID;
-    templateVars.email = req.cookies.email;
+  // console.log(req.session.ID, 'session ')
+  if (req.session.ID) {
+    templateVars.id = req.session.ID;
+    templateVars.email = req.session.email;
   }
 
   // console.log(templateVars)
@@ -65,11 +72,11 @@ app.get("/u/:shortURL", (req, res) => {
 
 //create new link
 app.get("/urls/new", (req, res) => {
-  if (req.cookies["ID"] === undefined) {
+  if (req.session["ID"] === undefined) {
     res.redirect(`/login`);
   }
 
-  let templateVars = { id: req.cookies["ID"], email: req.cookies["email"] };
+  let templateVars = { id: req.session["ID"], email: req.session["email"] };
   res.render("urls_new", templateVars);
 });
 
@@ -78,12 +85,12 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    id: req.cookies["ID"],
-    email: req.cookies["email"],
+    id: req.session["ID"],
+    email: req.session["email"],
     urls: urlDatabase
   };
 
-  let tinyArr = lookUpURLSbyID(req.cookies["ID"], urlDatabase, "shortURL");
+  let tinyArr = lookUpURLSbyID(req.session["ID"], urlDatabase, "shortURL");
 
   if (urlDatabase[req.params.shortURL] === undefined) {
     res.send("this URL does not exist");
@@ -102,8 +109,8 @@ app.post("/urls", (req, res) => {
 
   let templateVars = {
     longURL: urlDatabase[req.params.shortURL],
-    id: req.cookies["ID"],
-    email: req.cookies["email"],
+    id: req.session["ID"],
+    email: req.session["email"],
     urls: urlDatabase
   };
   
@@ -112,7 +119,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[randomID]={
     longURL : req.body.longURL,
     shortURL : randomID,
-    userID: req.cookies["ID"]
+    userID: req.session["ID"]
   }
 
   // console.log(templateVarscl)
@@ -123,7 +130,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   // console.log(req.params, 'req.params')
 
-  let tinyArr = lookUpURLSbyID(req.cookies["ID"], urlDatabase, "shortURL");  //only the owner of the url can delete
+  let tinyArr = lookUpURLSbyID(req.session["ID"], urlDatabase, "shortURL");  //only the owner of the url can delete
   if (tinyArr.indexOf(req.params.shortURL) === -1) {
     res.statusCode = 400;
     res.end("400 Bad Request, Can not delete, this is not your URL");
@@ -144,13 +151,13 @@ app.post("/urls/:id", (req, res) => {
 
 //to login page
 app.get("/login", (req, res) => {
-  let templateVars = { id: req.cookies["id"] };
+  let templateVars = { id: req.session["id"] };
   res.render(`urls_login`, templateVars);
 });
 
 //to register page
 app.get("/register", (req, res) => {
-  let templateVars = { id: req.cookies["id"] };
+  let templateVars = { id: req.session["id"] };
   res.render(`urls_register`, templateVars);
 });
 
@@ -180,16 +187,18 @@ app.post("/register", (req, res) => {
     });
 
     // console.log(users[randomUserID])
-    res.cookie("ID", users[randomUserID].id);
-    res.cookie("email", users[randomUserID].email);
+    req.session.ID=users[randomUserID].id
+    req.session.email=users[randomUserID].email
     res.redirect(`/urls`);
   }
 });
 
 //logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("ID");
-  res.clearCookie("email");
+  // res.clearCookie("ID");
+  // res.clearCookie("email");
+  req.session = null
+
   res.redirect(`/urls`);
 });
 
@@ -200,8 +209,8 @@ app.post("/login", (req, res) => {
   if (checkForEmail(email, users)) {
     if(bcrypt.compareSync(password, users[lookUp3rdArgwith1st(email, users, "id")].password)){
 
-      res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
-      res.cookie("email", email);
+      req.session.ID = lookUp3rdArgwith1st(email, users, "id")
+      req.session.email= email
     } else {
       res.statusCode = 403;
       res.end("403 Incorrect password");
