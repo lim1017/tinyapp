@@ -4,9 +4,9 @@ const cookieParser = require("cookie-parser");
 
 
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
-const myPlaintextPassword = 's0/\/\P4$$w0rD';
-const someOtherPlaintextPassword = 'not_bacon';
+const saltRounds = 3;
+// const myPlaintextPassword = 's0/\/\P4$$w0rD';
+// const someOtherPlaintextPassword = 'not_bacon';
 
 
 const bodyParser = require("body-parser");
@@ -174,9 +174,8 @@ app.post("/register", (req, res) => {
      
     };
 
-    bcrypt.hash(password, saltRounds, function(err, hash) {
-      users[randomUserID].password=hash
-
+    bcrypt.hash(password, saltRounds, function(err, hash) {   //encrypts the password 
+      users[randomUserID].password=hash                       //stores the encrpted pw in users obj
     });
 
 
@@ -199,9 +198,17 @@ app.post("/logout", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
+  
+
   if (checkForEmail(email, users)) {
     // if (lookUp3rdArgwith1st(email, users, "id")===id) {
-    if (lookUp3rdArgwith1st(email, users, "password") === password) {
+    // if (bcrypt.hashSync(password) === user.lookUp3rdArgwith1st(email, users, "id".password))
+    
+    // console.log(users[lookUp3rdArgwith1st(email, users, "id")].password, 'scrambled pwwws')
+
+    if(bcrypt.compareSync(password, users[lookUp3rdArgwith1st(email, users, "id")].password)){
+
+
       res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
       res.cookie("email", email);
     } else {
@@ -246,12 +253,12 @@ function checkForEmail(emails, obj) {
 
 function lookUp3rdArgwith1st(arg1, obj, arg3) {
   for (id in obj) {
-    console.log(arg1, "arg1");
-    console.log(id, "idddd");
-    console.log(arg3, "arg3");
+    // console.log(arg1, "arg1");
+    // console.log(id, "idddd");
+    // console.log(arg3, "arg3");
 
     if (obj[id].email === arg1) {
-      // console.log(obj[id].arg3, 'obj[id].arg3')
+      console.log(obj[id][arg3], 'obj[id].arg3')
       return obj[id][arg3];
     }
   }
@@ -262,7 +269,7 @@ function lookUpURLSbyID(ID, obj, arg3) {
 
   for (url in obj) {
     if (obj[url].userID === ID) {
-      console.log(obj[url][arg3], "asdfasdjfkajsdfhkjasdfh");
+      console.log(obj[url][arg3], "asdfasdjfkasdfasdfsadfasdfsadfajsdfhkjasdfh");
       UrlArray.push(obj[url][arg3]);
     }
   }
