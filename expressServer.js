@@ -50,25 +50,47 @@ const users = {
   }
 };
 
-app.get("/urls", (req, res) => {
-  // console.log(req.session.ID, "cookie id");
-console.log(users)
+app.get("/", (req, res) => {
+  
   let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
-  // console.log(templateVars, ' template vars')
-  // console.log(req.session.ID, 'session ')
-  if (req.session.ID) {
+
+  if (req.session["ID"] === undefined) {
+    res.redirect(`/login`);
+  }  else if (req.session.ID) {
     templateVars.id = req.session.ID;
     templateVars.email = req.session.email;
   }
 
-  // console.log(templateVars)
+  res.redirect(`/urls`)
+});
+
+
+
+//home page
+app.get("/urls", (req, res) => {
+  let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
+
+  if (req.session.ID) {
+    templateVars.id = req.session.ID;
+    templateVars.email = req.session.email;
+  }
   res.render("urls_index", templateVars);
 });
 
+
+//short link redirect to longurl
 app.get("/u/:shortURL", (req, res) => {
   let short = req.params.shortURL;
-  res.redirect(urlDatabase[short]);
+  
+  
+  let link2LongURL= lookUp3rdArgwith1st(short, urlDatabase, 'longURL', 'shortURL')
+
+
+  res.redirect(link2LongURL);
 });
+
+
+
 
 //create new link
 app.get("/urls/new", (req, res) => {
@@ -92,8 +114,16 @@ app.get("/urls/:shortURL", (req, res) => {
 
   let tinyArr = lookUpURLSbyID(req.session["ID"], urlDatabase, "shortURL");
 
+  if (req.session["ID"] === undefined) {
+    res.statusCode = 400;
+
+    res.send("400 Bad Request, Please Login to edit Urls");
+  }
+
   if (urlDatabase[req.params.shortURL] === undefined) {
-    res.send("this URL does not exist");
+    res.statusCode = 400;
+
+    res.send("400 Bad Request, This URL does not exist");
   }
 
   if (tinyArr.indexOf(req.params.shortURL) === -1) {
@@ -207,9 +237,9 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   if (checkForEmail(email, users)) {
-    if(bcrypt.compareSync(password, users[lookUp3rdArgwith1st(email, users, "id")].password)){
+    if(bcrypt.compareSync(password, users[lookUp3rdArgwith1st(email, users, "id", 'email')].password)){
 
-      req.session.ID = lookUp3rdArgwith1st(email, users, "id")
+      req.session.ID = lookUp3rdArgwith1st(email, users, "id", 'email')
       req.session.email= email
     } else {
       res.statusCode = 403;
@@ -251,13 +281,10 @@ function checkForEmail(emails, obj) {
   return false;
 }
 
-function lookUp3rdArgwith1st(arg1, obj, arg3) {
+function lookUp3rdArgwith1st(arg1, obj, arg3, stringOFarg1) {
   for (id in obj) {
-    // console.log(arg1, "arg1");
-    // console.log(id, "idddd");
-    // console.log(arg3, "arg3");
 
-    if (obj[id].email === arg1) {
+    if (obj[id][stringOFarg1] === arg1) {
       console.log(obj[id][arg3], 'obj[id].arg3')
       return obj[id][arg3];
     }
