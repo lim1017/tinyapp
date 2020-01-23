@@ -9,6 +9,8 @@ function checkForEmail(emails, obj) {
   return false;
 }
 
+//  lookUp3rdArgwith1st(req.session["ID"], urlDatabase, "shortURL", 'userID')
+
 function lookUp3rdArgwith1st(arg1, obj, arg3, stringOFarg1) {
   for (id in obj) {
     if (obj[id][stringOFarg1] === arg1) {
@@ -25,7 +27,6 @@ function lookUpURLSbyID(ID, obj, arg3) {
       UrlArray.push(obj[url][arg3]);
     }
   }
-
   return UrlArray;
 }
 
@@ -43,7 +44,6 @@ function generateRandomString(num) {
 function makePersonalUrlObj(obj, id){
   const copys = {}
   for (let key in obj) {
-  
     if (id === obj[key].userID) {
       copys[key]=obj[key]
     }  
