@@ -106,10 +106,22 @@ app.post("/urls", (req, res) => {
     email: req.cookies["email"],
     urls: urlDatabase
   };
-  console.log(req.params, "req.params");
-  // console.log(req.body, 'req.body.longURL');  // Log the POST request body to the console
+  
+  console.log(req.body.longURL, 'req.body.longURL');  // Log the POST request body to the console
   let randomID = generateRandomString(6);
-  urlDatabase[randomID] = req.body.longURL;
+  urlDatabase[randomID]={
+    longURL : req.body.longURL,
+    shortURL : randomID,
+    userID: req.cookies["ID"]
+  }
+  ////////////////////////////////////////////////////////////
+
+
+  console.log(urlDatabase)
+
+
+
+
   // console.log(templateVarscl)
   res.redirect(`/urls/${randomID}`); //redirect to route not to page.
 });
@@ -165,20 +177,14 @@ app.post("/register", (req, res) => {
   } else {
     let randomUserID = generateRandomString(8);
 
-    
-
-
     users[randomUserID] = {
       id: randomUserID,
-      email: email,
-     
+      email: email, 
     };
 
     bcrypt.hash(password, saltRounds, function(err, hash) {   //encrypts the password 
       users[randomUserID].password=hash                       //stores the encrpted pw in users obj
     });
-
-
 
     // console.log(users[randomUserID])
     res.cookie("ID", users[randomUserID].id);
@@ -198,16 +204,8 @@ app.post("/logout", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  
-
   if (checkForEmail(email, users)) {
-    // if (lookUp3rdArgwith1st(email, users, "id")===id) {
-    // if (bcrypt.hashSync(password) === user.lookUp3rdArgwith1st(email, users, "id".password))
-    
-    // console.log(users[lookUp3rdArgwith1st(email, users, "id")].password, 'scrambled pwwws')
-
     if(bcrypt.compareSync(password, users[lookUp3rdArgwith1st(email, users, "id")].password)){
-
 
       res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
       res.cookie("email", email);
