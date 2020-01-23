@@ -2,6 +2,13 @@ const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
 
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
+
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -37,8 +44,8 @@ const users = {
 };
 
 app.get("/urls", (req, res) => {
-  console.log(req.cookies.ID, "cookie id");
-
+  // console.log(req.cookies.ID, "cookie id");
+console.log(users)
   let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
   // console.log(req.cookies.ID, 'cookies ')
@@ -92,6 +99,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //add a new link
 app.post("/urls", (req, res) => {
+
   let templateVars = {
     longURL: urlDatabase[req.params.shortURL],
     id: req.cookies["ID"],
@@ -157,16 +165,25 @@ app.post("/register", (req, res) => {
   } else {
     let randomUserID = generateRandomString(8);
 
+    
+
+
     users[randomUserID] = {
       id: randomUserID,
       email: email,
-      password: password
+     
     };
+
+    bcrypt.hash(password, saltRounds, function(err, hash) {
+      users[randomUserID].password=hash
+
+    });
+
+
 
     // console.log(users[randomUserID])
     res.cookie("ID", users[randomUserID].id);
     res.cookie("email", users[randomUserID].email);
-
     res.redirect(`/urls`);
   }
 });
