@@ -114,13 +114,6 @@ app.post("/urls", (req, res) => {
     shortURL : randomID,
     userID: req.cookies["ID"]
   }
-  ////////////////////////////////////////////////////////////
-
-
-  console.log(urlDatabase)
-
-
-
 
   // console.log(templateVarscl)
   res.redirect(`/urls/${randomID}`); //redirect to route not to page.
