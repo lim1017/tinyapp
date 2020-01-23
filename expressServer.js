@@ -6,8 +6,12 @@ const saltRounds = 3;
 const bodyParser = require("body-parser");
 
 const {
-  checkForEmail, lookUp3rdArgwith1st, lookUpURLSbyID, generateRandomString, makePersonalUrlObj
-      } = require("./tinyfunctions");
+  checkForEmail,
+  lookUp3rdArgwith1st,
+  lookUpURLSbyID,
+  generateRandomString,
+  makePersonalUrlObj
+} = require("./tinyfunctions");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -45,9 +49,8 @@ const users = {
     id: "admin",
     email: "admin@tinyurl.com",
     password: "$2b$04$GpszQOD0UeM7XE9Ey6VY2ekLujaTSJg5ZWDFbKAMvB.rgWGcZeLK."
-  },
+  }
 };
-
 
 // Start of paths
 app.get("/", (req, res) => {
@@ -65,9 +68,6 @@ app.get("/", (req, res) => {
 //home page
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
-
-  console.log(users, 'usersss')
-  console.log(urlDatabase, 'url database')
 
   if (req.session.ID) {
     templateVars.id = req.session.ID;
@@ -111,8 +111,6 @@ app.get("/urls/new", (req, res) => {
 
 //page after a url is created && edit page///
 app.get("/urls/:shortURL", (req, res) => {
-  console.log('--------------------------------------')
-  console.log(urlDatabase, 'urllllll data base')
 
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -164,14 +162,18 @@ app.post("/urls", (req, res) => {
 
 //delete a link
 app.post("/urls/:shortURL/delete", (req, res) => {
-
-
-  let tinyArr = lookUp3rdArgwith1st(req.session["ID"], urlDatabase, "shortURL", 'userID'); //only the owner of the url can delete
+  let tinyArr = lookUp3rdArgwith1st(
+    req.session["ID"],
+    urlDatabase,
+    "shortURL",
+    "userID"
+  ); //only the owner of the url can delete
 
   if (req.session["ID"] === undefined) {
     res.statusCode = 400;
     res.end("400 Bad Request, Please login to use TinyURL");
-  } else if (tinyArr !== urlDatabase[tinyArr].shortURL) {   //(tinyArr.indexOf(req.params.shortURL) === -1) 
+  } else if (tinyArr !== urlDatabase[tinyArr].shortURL) {
+    //(tinyArr.indexOf(req.params.shortURL) === -1)
     res.statusCode = 400;
     res.end("400 Bad Request, Can not delete, this is not your URL");
   } else {
@@ -210,7 +212,8 @@ app.post("/register", (req, res) => {
   if (email === "" || password === "") {
     res.statusCode = 400;
     res.end("400 Bad Request, Email or Password empty");
-  } else if (checkForEmail(email, users)) {    //email already exists??
+  } else if (checkForEmail(email, users)) {
+    //email already exists??
     res.statusCode = 401;
     res.end("401 Bad Request, Email already exists");
   } else {
@@ -242,7 +245,13 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   if (checkForEmail(email, users)) {
-    if (bcrypt.compareSync(password,users[lookUp3rdArgwith1st(email, users, "id", "email")].password)) {  //if pw match
+    if (
+      bcrypt.compareSync(
+        password,
+        users[lookUp3rdArgwith1st(email, users, "id", "email")].password
+      )
+    ) {
+      //if pw match
       req.session.ID = lookUp3rdArgwith1st(email, users, "id", "email");
       req.session.email = email;
     } else {
