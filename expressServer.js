@@ -11,13 +11,21 @@ app.set("view engine", "ejs");
 const PORT = 8080; // default port 8080
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  '9sm5xK': "http://www.google.com"
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID1",
+    shortURL: "b2xVn2"
+  },
+  asm5xK: {
+    longURL: "http://www.google.com",
+    userID: "userRandomID1",
+    shortURL: "asm5xK"
+  }
 };
 
 const users = {
   userRandomID1: {
-    id: "userRandomID",
+    id: "userRandomID1",
     email: "user@example.com",
     password: "asdf"
   },
@@ -29,6 +37,8 @@ const users = {
 };
 
 app.get("/urls", (req, res) => {
+  console.log(req.cookies.ID, "cookie id");
+
   let templateVars = { urls: urlDatabase, id: undefined, user: users }; //urls is equal to urlDatabase object in the .ejs file.
   // console.log(templateVars, ' template vars')
   // console.log(req.cookies.ID, 'cookies ')
@@ -36,6 +46,7 @@ app.get("/urls", (req, res) => {
     templateVars.id = req.cookies.ID;
     templateVars.email = req.cookies.email;
   }
+
   // console.log(templateVars)
   res.render("urls_index", templateVars);
 });
@@ -47,12 +58,11 @@ app.get("/u/:shortURL", (req, res) => {
 
 //create new link
 app.get("/urls/new", (req, res) => {
-
-  if ( req.cookies["ID"]=== undefined){
-    res.redirect(`/login`)
+  if (req.cookies["ID"] === undefined) {
+    res.redirect(`/login`);
   }
 
-  let templateVars = { id: req.cookies["ID"], email: req.cookies['email']};
+  let templateVars = { id: req.cookies["ID"], email: req.cookies["email"] };
   res.render("urls_new", templateVars);
 });
 
@@ -62,19 +72,32 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
     id: req.cookies["ID"],
-    email: req.cookies['email']
+    email: req.cookies["email"],
+    urls: urlDatabase
   };
-  // console.log(req.params, ' req.params')
-  // console.log(templateVars)
+
+  let tinyArr = lookUpURLSbyID(req.cookies["ID"], urlDatabase, "shortURL");
+
   if (urlDatabase[req.params.shortURL] === undefined) {
     res.send("this URL does not exist");
   }
+
+  if (tinyArr.indexOf(req.params.shortURL) === -1) {
+    res.statusCode = 400;
+    res.end("400 Bad Request, This is not your URL");
+  }
+
   res.render("urls_show", templateVars);
 });
 
 //add a new link
 app.post("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    longURL: urlDatabase[req.params.shortURL],
+    id: req.cookies["ID"],
+    email: req.cookies["email"],
+    urls: urlDatabase
+  };
   console.log(req.params, "req.params");
   // console.log(req.body, 'req.body.longURL');  // Log the POST request body to the console
   let randomID = generateRandomString(6);
@@ -87,8 +110,14 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   // console.log(req.params, 'req.params')
 
-  delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls`);
+  let tinyArr = lookUpURLSbyID(req.cookies["ID"], urlDatabase, "shortURL");  //only the owner of the url can delete
+  if (tinyArr.indexOf(req.params.shortURL) === -1) {
+    res.statusCode = 400;
+    res.end("400 Bad Request, Can not delete, this is not your URL");
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect(`/urls`);
+  }
 });
 
 //update a link
@@ -146,24 +175,22 @@ app.post("/register", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("ID");
   res.clearCookie("email");
-
   res.redirect(`/urls`);
 });
 
-
 //login
 app.post("/login", (req, res) => {
-  const { email, password} = req.body;
+  const { email, password } = req.body;
 
   if (checkForEmail(email, users)) {
     // if (lookUp3rdArgwith1st(email, users, "id")===id) {
-      if (lookUp3rdArgwith1st(email, users, "password")===password) {
-        res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
-        res.cookie("email", email);
-      } else {
-        res.statusCode = 403;
-        res.end("403 Incorrect password");
-      }
+    if (lookUp3rdArgwith1st(email, users, "password") === password) {
+      res.cookie("ID", lookUp3rdArgwith1st(email, users, "id"));
+      res.cookie("email", email);
+    } else {
+      res.statusCode = 403;
+      res.end("403 Incorrect password");
+    }
     // }
   } else {
     //email not exists
@@ -174,9 +201,6 @@ app.post("/login", (req, res) => {
   // res.cookie('email',req.body.email)
   res.redirect(`/urls`);
 });
-
-
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -205,12 +229,26 @@ function checkForEmail(emails, obj) {
 
 function lookUp3rdArgwith1st(arg1, obj, arg3) {
   for (id in obj) {
-    // console.log(obj[id].email, 'obj[id].email')
+    console.log(arg1, "arg1");
+    console.log(id, "idddd");
+    console.log(arg3, "arg3");
+
     if (obj[id].email === arg1) {
       // console.log(obj[id].arg3, 'obj[id].arg3')
       return obj[id][arg3];
     }
   }
+}
 
-  return "";
+function lookUpURLSbyID(ID, obj, arg3) {
+  let UrlArray = [];
+
+  for (url in obj) {
+    if (obj[url].userID === ID) {
+      console.log(obj[url][arg3], "asdfasdjfkajsdfhkjasdfh");
+      UrlArray.push(obj[url][arg3]);
+    }
+  }
+
+  return UrlArray;
 }
