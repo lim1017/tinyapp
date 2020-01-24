@@ -150,9 +150,16 @@ app.post("/urls", (req, res) => {
     urls: urlDatabase
   };
 
+  //adds http to links the begining of links without
+  let longURL=req.body.longURL
+  if (!longURL.startsWith('http://')){
+    longURL='http://'+longURL
+  }
+
+
   let randomID = generateRandomString(6);
   urlDatabase[randomID] = {
-    longURL: req.body.longURL,
+    longURL: longURL,
     shortURL: randomID,
     userID: req.session["ID"]
   };
@@ -184,7 +191,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //update a link/////////////////////
 app.post("/urls/update/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+
+  let longURL=req.body.longURL
+  
+  if (!longURL.startsWith('http://')){
+    longURL='http://'+longURL
+  }
+
+  urlDatabase[req.params.shortURL].longURL = longURL;
+
+
+
   res.redirect(`/urls`);
 });
 
@@ -254,6 +271,7 @@ app.post("/login", (req, res) => {
       //if pw match
       req.session.ID = lookUp3rdArgwith1st(email, users, "id", "email");
       req.session.email = email;
+      res.redirect(`/urls`);
     } else {
       res.statusCode = 403;
       res.end("403 Incorrect password");
@@ -265,8 +283,7 @@ app.post("/login", (req, res) => {
     res.end("403 E-mail not found");
   }
 
-  // res.cookie('email',req.body.email)
-  res.redirect(`/urls`);
+  
 });
 
 app.listen(PORT, () => {
