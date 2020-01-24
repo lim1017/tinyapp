@@ -125,20 +125,14 @@ app.get("/urls/:shortURL", (req, res) => {
     res.statusCode = 400;
 
     res.send("400 Bad Request, Please Login to edit Urls");
-  }
-
-  if (urlDatabase[req.params.shortURL] === undefined) {
+  } else if (urlDatabase[req.params.shortURL] === undefined) {
     res.statusCode = 400;
 
     res.send("400 Bad Request, This URL does not exist");
-  }
-
-  if (tinyArr.indexOf(req.params.shortURL) === -1) {
+  } else if (tinyArr.indexOf(req.params.shortURL) === -1) {
     res.statusCode = 400;
     res.end("400 Bad Request, This is not your URL");
-  }
-
-  res.render("urls_show", templateVars);
+  } else res.render("urls_show", templateVars);
 });
 
 //Actully making a new link
