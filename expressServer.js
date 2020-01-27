@@ -202,6 +202,11 @@ app.post("/urls/update/:shortURL", (req, res) => {
 //to login page
 app.get("/login", (req, res) => {
   let templateVars = { id: req.session["id"] };
+
+  if (req.session["ID"] !== undefined) {
+    res.redirect(`/urls`);
+  }
+
   res.render(`urls_login`, templateVars);
 });
 
